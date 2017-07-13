@@ -111,20 +111,14 @@ restService.post('/mirror', function(req, res) {
 
     else if (speech.valueOf()== WELCOME.valueOf()){
 
-        app.ask(app
+        return res.json(app.ask(app
             .buildRichResponse()
 
             .addSimpleResponse({speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
             'and wedding anniversarys for today. So,  which feeds you would like to hear ?', displayText: 'Welcome ' +
             'to Cantiz Mirror.'})
             .addSuggestions(['Birthdays', 'Milestones', 'Wedding Anniversary'])
-            .addSuggestionLink('Cantiz Mirror', 'http://mirror.attinadsoftware.com/'));
-        // return res.json({
-        //     speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
-        //     'and wedding anniversarys for today. So,  which feeds you would like to hear ?',
-        //     displayText: 'Welcome to Cantiz Mirror',
-        //     source: 'mirror-webhook-heroku'
-        // });
+            .addSuggestionLink('Cantiz Mirror', 'http://mirror.attinadsoftware.com/')));
     }
 
     else if (speech.valueOf()== BIRTHDAYS.valueOf()) {
