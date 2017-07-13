@@ -2,7 +2,7 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-var requestapp = require('request');
+// var requestapp = require('request');
 let ApiAiApp = require('actions-on-google').ApiAiApp;
 
 const BIRTHDAYS = 'Birthday_Intent';
@@ -20,24 +20,37 @@ restService.use(bodyParser.urlencoded({
 
 restService.use(bodyParser.json());
 
-restService.post('/mirror', function(req, res) {
-    const app = new ApiAiApp({req,res});
-    var suggestion = [];
-    suggestion.push(
+restService.post('/mirror', function(request, response) {
+    const app = new ApiAiApp({request,response});
+    var requestapp = require('request');
+
+    function getWelcome(app)
     {
-        "title" : "Birthdays"
-    },
-    {
-        "title": "Milestones"
-    },
-    {
-        "title": "Wedding Anniversary"
+        app.ask(app
+            .buildRichResponse()
+
+            .addSimpleResponse({speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
+            'and wedding anniversarys for today. So,  which feeds you would like to hear ?', displayText: 'Welcome ' +
+            'to Cantiz Mirror.'})
+            .addSuggestions(['Birthdays', 'Milestones', 'Wedding Anniversary'])
+            .addSuggestionLink('Cantiz Mirror', 'http://mirror.attinadsoftware.com/'));
     }
-    );
 
-    var speech = req.body.result && req.body.result.action ? req.body.result.action : NO_INTENT;
+    function getBirthdays(app)
+    {
+        app.ask(app
+            .buildRichResponse()
 
-    if (speech.valueOf()== MILESTONES.valueOf()) {
+            .addSimpleResponse({speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
+            'and wedding anniversarys for today. So,  which feeds you would like to hear ?', displayText: 'Welcome ' +
+            'to Cantiz Mirror.'})
+            .addSuggestions(['Birthdays', 'Milestones', 'Wedding Anniversary'])
+            .addSuggestionLink('Cantiz Mirror', 'http://mirror.attinadsoftware.com/'));
+
+    }
+
+    function getMilestones(app)
+    {
         requestapp.get({
                 url: 'http://teamcantiz:megamirror156@stg.mirror.attinadsoftware.com:8080/milestones.json'
             },
@@ -49,110 +62,48 @@ restService.post('/mirror', function(req, res) {
                     for (var key in resFinal) {
                         finalString = finalString + ' People celebrating ' + key + ' year milestone ';
                         resFinal[key].forEach(function (value) {
-                            finalString = finalString + value + ', ';
+                            finalString = finalString + value + ' ,';
                         });
                     }
 
                     console.log('res final ' + finalString);
 
-                    return res.json({
-                        speech: finalString,
-                        displayText: finalString,
-                        source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
-                    });
+                    app.ask(app
+                        .buildRichResponse()
+                        .addSimpleResponse({speech: finalString, displayText: finalString}));
                 }
                 else {
-                    return res.json({
-                        speech: 'There are no milestone feeds for today',
-                        displayText: 'There are no milestone feeds for today',
-                        source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
-                    });
+                    app.ask(app
+                        .buildRichResponse()
+                        .addSimpleResponse({
+                            speech: 'There are no milestones for todays',
+                            displayText: 'No Milestones'
+                        }));
                 }
             });
     }
 
-    else if (speech.valueOf()== ANNIVERSARY.valueOf()) {
-        requestapp.get({
-                url: 'http://teamcantiz:megamirror156@stg.mirror.attinadsoftware.com:8080/wedding_anniversaries.json'
-            },
-            function (request, response, body){
-
-                var resFinal = responseSerialization(body);
-                if (resFinal!=null) {
-                    var finalString ='';
-                    for (var key in resFinal) {
-                        finalString = finalString + ' People celebrating ' + key + ' year of happy married life ';
-                        resFinal[key].forEach(function (value) {
-                            finalString = finalString + value + ', ';
-                        });
-                    }
-
-                    console.log('res final ' + finalString);
-
-                    return res.json({
-                        speech: finalString,
-                        displayText: finalString,
-                        source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
-                    });
-                }
-                else {
-                    return res.json({
-                        speech: 'There are no wedding anniversary feeds for today',
-                        displayText: 'There are no wedding anniversary feeds for today',
-                        source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
-                    });
-                }
-            });
-    }
-
-    else if (speech.valueOf()== WELCOME.valueOf()){
-
-        return res.json(app.ask(app
+    function getAnniversary(app)
+    {
+        app.ask(app
             .buildRichResponse()
 
             .addSimpleResponse({speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
             'and wedding anniversarys for today. So,  which feeds you would like to hear ?', displayText: 'Welcome ' +
             'to Cantiz Mirror.'})
             .addSuggestions(['Birthdays', 'Milestones', 'Wedding Anniversary'])
-            .addSuggestionLink('Cantiz Mirror', 'http://mirror.attinadsoftware.com/')));
+            .addSuggestionLink('Cantiz Mirror', 'http://mirror.attinadsoftware.com/'));
     }
 
-    else if (speech.valueOf()== BIRTHDAYS.valueOf()) {
-        requestapp.get({
-                url: 'http://teamcantiz:megamirror156@stg.mirror.attinadsoftware.com:8080/birthdays.json'
-            },
-            function (request, response, body){
 
-                var resFinal = parseBirthdayResponse(body);
-               if (resFinal == ''){
-                   return res.json({
-                       speech: 'There are no birthday babies today',
-                       displayText: 'There are no birthday babies today',
-                       source: 'mirror-webhook-heroku',
-                       suggestions: suggestion
-                   });
-               }else{
-                   return res.json({
-                       speech: 'Todays birthday babies are ' + resFinal,
-                       displayText: 'Todays birthday babies are ' + resFinal,
-                       source: 'mirror-webhook-heroku',
-                       suggestions: suggestion
-                   });
-               }
-            });
-    }
+    const actionMap = new Map();
+    actionMap.set(WELCOME, getWelcome);
+    actionMap.set(BIRTHDAYS, getBirthdays);
+    actionMap.set(MILESTONES, getMilestones);
+    actionMap.set(ANNIVERSARY, getAnniversary);
 
-    else if (speech.valueOf()== NO_INTENT.valueOf()){
-        return res.json({
-            speech: 'Some problem with Google, please visit us again',
-            displayText: 'Some problem with Google, please visit us again',
-            source: 'mirror-webhook-heroku'
-        });
-    }
+
+    app.handleRequest(actionMap);
 
 });
 
