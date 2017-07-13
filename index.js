@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 var requestapp = require('request');
+let ApiAiApp = require('actions-on-google').ApiAiApp;
 
 const BIRTHDAYS = 'Birthday_Intent';
 const MILESTONES = 'Milestone_Intent';
@@ -20,6 +21,7 @@ restService.use(bodyParser.urlencoded({
 restService.use(bodyParser.json());
 
 restService.post('/mirror', function(req, res) {
+    const app = new ApiAiApp({req,res});
     var suggestion = [];
     suggestion.push(
     {
@@ -57,17 +59,7 @@ restService.post('/mirror', function(req, res) {
                         speech: finalString,
                         displayText: finalString,
                         source: 'mirror-webhook-heroku',
-                        suggestions: [
-                            {
-                                "title" : "Birthdays"
-                            },
-                            {
-                                "title": "Milestones"
-                            },
-                            {
-                                "title": "Wedding Anniversary"
-                            }
-                        ]
+                        suggestions: suggestion
                     });
                 }
                 else {
@@ -75,17 +67,7 @@ restService.post('/mirror', function(req, res) {
                         speech: 'There are no milestone feeds for today',
                         displayText: 'There are no milestone feeds for today',
                         source: 'mirror-webhook-heroku',
-                        suggestions: [
-                            {
-                                "title" : "Birthdays"
-                            },
-                            {
-                                "title": "Milestones"
-                            },
-                            {
-                                "title": "Wedding Anniversary"
-                            }
-                        ]
+                        suggestions: suggestion
                     });
                 }
             });
@@ -113,17 +95,7 @@ restService.post('/mirror', function(req, res) {
                         speech: finalString,
                         displayText: finalString,
                         source: 'mirror-webhook-heroku',
-                        suggestions: [
-                            {
-                                "title" : "Birthdays"
-                            },
-                            {
-                                "title": "Milestones"
-                            },
-                            {
-                                "title": "Wedding Anniversary"
-                            }
-                        ]
+                        suggestions: suggestion
                     });
                 }
                 else {
@@ -131,29 +103,28 @@ restService.post('/mirror', function(req, res) {
                         speech: 'There are no wedding anniversary feeds for today',
                         displayText: 'There are no wedding anniversary feeds for today',
                         source: 'mirror-webhook-heroku',
-                        suggestions: [
-                            {
-                                "title" : "Birthdays"
-                            },
-                            {
-                                "title": "Milestones"
-                            },
-                            {
-                                "title": "Wedding Anniversary"
-                            }
-                        ]
+                        suggestions: suggestion
                     });
                 }
             });
     }
 
     else if (speech.valueOf()== WELCOME.valueOf()){
-        return res.json({
-            speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
-            'and wedding anniversarys for today. So,  which feeds you would like to hear ?',
-            displayText: 'Welcome to Cantiz Mirror',
-            source: 'mirror-webhook-heroku'
-        });
+
+        app.ask(app
+            .buildRichResponse()
+
+            .addSimpleResponse({speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
+            'and wedding anniversarys for today. So,  which feeds you would like to hear ?', displayText: 'Welcome ' +
+            'to Cantiz Mirror.'})
+            .addSuggestions(['Birthdays', 'Milestones', 'Wedding Anniversary'])
+            .addSuggestionLink('Cantiz Mirror', 'http://mirror.attinadsoftware.com/'));
+        // return res.json({
+        //     speech: 'Welcome to Cantiz Mirror, you can find the Milestones, Birthdays, ' +
+        //     'and wedding anniversarys for today. So,  which feeds you would like to hear ?',
+        //     displayText: 'Welcome to Cantiz Mirror',
+        //     source: 'mirror-webhook-heroku'
+        // });
     }
 
     else if (speech.valueOf()== BIRTHDAYS.valueOf()) {
@@ -168,34 +139,14 @@ restService.post('/mirror', function(req, res) {
                        speech: 'There are no birthday babies today',
                        displayText: 'There are no birthday babies today',
                        source: 'mirror-webhook-heroku',
-                       suggestions: [
-                           {
-                               "title" : "Birthdays"
-                           },
-                           {
-                               "title": "Milestones"
-                           },
-                           {
-                               "title": "Wedding Anniversary"
-                           }
-                       ]
+                       suggestions: suggestion
                    });
                }else{
                    return res.json({
                        speech: 'Todays birthday babies are ' + resFinal,
                        displayText: 'Todays birthday babies are ' + resFinal,
                        source: 'mirror-webhook-heroku',
-                       suggestions: [
-                           {
-                               "title" : "Birthdays"
-                           },
-                           {
-                               "title": "Milestones"
-                           },
-                           {
-                               "title": "Wedding Anniversary"
-                           }
-                       ]
+                       suggestions: suggestion
                    });
                }
             });
@@ -216,8 +167,7 @@ restService.listen((process.env.PORT || 8000), function() {
     console.log("Server up and listening");
 });
 
-function responseSerialization(body)
-{
+function responseSerialization(body) {
     var resFinal = {};
     var jsonBody = JSON.parse(body);
     if (Object.keys(jsonBody).length>0) 
