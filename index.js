@@ -57,7 +57,17 @@ restService.post('/mirror', function(req, res) {
                         speech: finalString,
                         displayText: finalString,
                         source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
+                        suggestions: [
+                            {
+                                "title" : "Birthdays"
+                            },
+                            {
+                                "title": "Milestones"
+                            },
+                            {
+                                "title": "Wedding Anniversary"
+                            }
+                        ]
                     });
                 }
                 else {
@@ -65,7 +75,17 @@ restService.post('/mirror', function(req, res) {
                         speech: 'There are no milestone feeds for today',
                         displayText: 'There are no milestone feeds for today',
                         source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
+                        suggestions: [
+                            {
+                                "title" : "Birthdays"
+                            },
+                            {
+                                "title": "Milestones"
+                            },
+                            {
+                                "title": "Wedding Anniversary"
+                            }
+                        ]
                     });
                 }
             });
@@ -93,7 +113,17 @@ restService.post('/mirror', function(req, res) {
                         speech: finalString,
                         displayText: finalString,
                         source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
+                        suggestions: [
+                            {
+                                "title" : "Birthdays"
+                            },
+                            {
+                                "title": "Milestones"
+                            },
+                            {
+                                "title": "Wedding Anniversary"
+                            }
+                        ]
                     });
                 }
                 else {
@@ -101,7 +131,17 @@ restService.post('/mirror', function(req, res) {
                         speech: 'There are no wedding anniversary feeds for today',
                         displayText: 'There are no wedding anniversary feeds for today',
                         source: 'mirror-webhook-heroku',
-                        suggestions: suggestion
+                        suggestions: [
+                            {
+                                "title" : "Birthdays"
+                            },
+                            {
+                                "title": "Milestones"
+                            },
+                            {
+                                "title": "Wedding Anniversary"
+                            }
+                        ]
                     });
                 }
             });
@@ -128,14 +168,34 @@ restService.post('/mirror', function(req, res) {
                        speech: 'There are no birthday babies today',
                        displayText: 'There are no birthday babies today',
                        source: 'mirror-webhook-heroku',
-                       suggestions: suggestion
+                       suggestions: [
+                           {
+                               "title" : "Birthdays"
+                           },
+                           {
+                               "title": "Milestones"
+                           },
+                           {
+                               "title": "Wedding Anniversary"
+                           }
+                       ]
                    });
                }else{
                    return res.json({
                        speech: 'Todays birthday babies are ' + resFinal,
                        displayText: 'Todays birthday babies are ' + resFinal,
                        source: 'mirror-webhook-heroku',
-                       suggestions: suggestion
+                       suggestions: [
+                           {
+                               "title" : "Birthdays"
+                           },
+                           {
+                               "title": "Milestones"
+                           },
+                           {
+                               "title": "Wedding Anniversary"
+                           }
+                       ]
                    });
                }
             });
